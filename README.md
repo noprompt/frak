@@ -12,6 +12,8 @@ user> (require 'frak)
 nil
 user> (frak/pattern ["foo" "bar" "baz" "quux"])
 #"(?:ba(?:r|z)|foo|quux)"
+user> (frak/pattern ["Clojure" "Clojars" "ClojureScript"])
+#"Cloj(?:ure(?:Script)?|ars)"
 ```
 
 ## How?
