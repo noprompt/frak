@@ -27,9 +27,9 @@ user> (frak/pattern ["Clojure" "Clojars" "ClojureScript"])
 ## How?
 
 A frak pattern is constructed from a very stupid trie of characters.
-As words are added to it, meta data is stored in it's branches. The
-meta data contains information such as which branches are terminal and
-a record of characters which have "visited" the branch.
+As characters are added to it, meta data is stored in it's branches.
+The meta data contains information such as which branches are terminal
+and a record of characters which have "visited" the branch.
 
 During the rendering process frak will prefer branch characters that
 have "visited" the most. In the example above, you will notice the
