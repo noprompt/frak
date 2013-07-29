@@ -48,8 +48,10 @@ user> (frak/pattern ["bit" "bat" "ban" "bot" "bar" "box"])
 [Here's](https://github.com/guns/vim-clojure-static/blob/249328ee659190babe2b14cd119f972b21b80538/syntax/clojure.vim#L91-L92)
 why. Also because.
 
+## And now for something completely different
+
 Let's build a regular expression for matching any word in
-`/usr/share/dict/words` (hint: no). 
+`/usr/share/dict/words`.
 
 ```clojure
 user> (require '[clojure.java.io :as io])
