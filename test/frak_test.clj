@@ -53,4 +53,9 @@
     (is (not (or (re-matches pat1 "f")
                  (re-matches pat1 "b")
                  (re-matches pat1 "ba")
-                 (re-matches pat1 "fo"))))))
+                 (re-matches pat1 "fo")))))
+
+  (let [pat1 (pattern ["foo" "foot"])
+        pat2 (pattern ["foo" "" "foot"])]
+    (is (= (str pat1)
+           (str pat2)))))

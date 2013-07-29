@@ -36,13 +36,11 @@
       (visit trie))))
 
 (defn- trie-put
-  ([s]
-     {:pre [(string? s)]}
-     (trie-put {} s))
+  ([s] (trie-put {} s))
   ([trie s]
      {:pre [(map? trie) (string? s)]}
      (if-not (seq s)
-       {}
+       trie
        (loop [t trie, ps (prefixes s)]
          (if-let [cs (and (next ps) (first ps))]
            (recur (grow t cs false) (next ps))
