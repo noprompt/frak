@@ -5,6 +5,14 @@ matching those strings. The primary goal of this library is to
 generate regular expressions from a known set of inputs which avoid
 backtracking as much as possible.
 
+## "Installation"
+
+Add frak as a dependency to your `project.clj` file.
+
+```clojure
+[frak "0.1.0"]
+```
+
 ## Usage
 
 ```clojure
