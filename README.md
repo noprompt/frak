@@ -10,7 +10,7 @@ backtracking as much as possible.
 Add frak as a dependency to your `project.clj` file.
 
 ```clojure
-[frak "0.1.0"]
+[frak "0.1.1"]
 ```
 
 ## Usage
