@@ -55,8 +55,8 @@ potential for improvement; the word trie could be converted to a
 directed acyclic word graph (DAWG).
 
 By using a DAWG it might be possible to produce more efficient
-patterns which consider both common prefixes and suffixes. This might
-reduce both backtracking and overall pattern size.
+patterns which consider common prefixes and suffixes. This could
+reduce backtracking and overall pattern size.
 
 ## And now for something completely different
 
