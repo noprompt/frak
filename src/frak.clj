@@ -1,5 +1,5 @@
 (ns frak
-  "Generate regulare expressions from collections of strings."
+  "Generate regular expressions from collections of strings."
   (:require [clojure.string :as s]))
 
 ;;;; Utilities
