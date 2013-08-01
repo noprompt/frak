@@ -118,7 +118,6 @@ You can view the full expression
 ;; Naive pattern 
 
 (bench (doseq [w ws'] (re-matches n-pat w)))
-
 ;;             Execution time mean : 1.499489 sec
 ;;    Execution time std-deviation : 181.365166 ms
 ;;   Execution time lower quantile : 1.337817 sec ( 2.5%)
