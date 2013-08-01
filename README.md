@@ -97,7 +97,8 @@ You can view the full expression
   [strs]
   (->> strs
        (clojure.string/join "|")
-       (format "(?:%s)")))
+       (format "(?:%s)")
+       re-pattern))
 
 ;; Shuffle 10000 words and build a naive and frak pattern from them.
 (def ws (shuffle (take 10000 words)))
