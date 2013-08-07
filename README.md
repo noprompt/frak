@@ -10,7 +10,7 @@ backtracking as much as possible.
 Add frak as a dependency to your `project.clj` file.
 
 ```clojure
-[frak "0.1.1"]
+[frak "0.1.2"]
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ Add frak as a dependency to your `project.clj` file.
 user> (require 'frak)
 nil
 user> (frak/pattern ["foo" "bar" "baz" "quux"])
-#"(?:ba(?:r|z)|foo|quux)"
+#"(?:ba[rz]|foo|quux)"
 user> (frak/pattern ["Clojure" "Clojars" "ClojureScript"])
 #"Cloj(?:ure(?:Script)?|ars)"
 ```
@@ -40,7 +40,7 @@ illustrates this behavior on the second character of each input.
 
 ```clojure
 user> (frak/pattern ["bit" "bat" "ban" "bot" "bar" "box"])
-#"b(?:a(?:t|n|r)|o(?:t|x)|it)"
+#"b(?:a[tnr]|o[tx]|it)"
 ```
 
 ## Why?
