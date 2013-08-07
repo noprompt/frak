@@ -62,21 +62,27 @@
     (format (re-group-fmt) (s/join "|" strs))
     s))
 
+(defn- re-char-set [chars]
+  (format "[%s]" (apply str chars)))
+
 (defn- render-trie [trie]
   (let [{vs :visitors ts :terminals} (meta trie)
         terminal? (set ts)
         ks (->> (keys trie)
                 (sort-by (frequencies vs))
-                reverse)]
-    (re-group
-     (for [k ks]
-       (let [sk (escape k)
-             fmt (if (terminal? k)
-                   (str "%s" (re-group-fmt) "?")
-                   "%s%s")]
-         (if-let [branch (trie k)]
-           (format fmt sk (render-trie branch))
-           sk))))))
+                reverse)
+        nks (if-let [cs (seq (filter #(nil? (trie %)) ks))]
+              (when (< 1 (count cs)) cs))
+        char-set (and (seq nks) (re-char-set nks))
+        branches (for [k (remove (set nks) ks)]
+                   (let [sk (escape k)
+                         fmt (if (terminal? k)
+                               (str "%s" (re-group-fmt) "?")
+                               "%s%s")]
+                     (if-let [branch (trie k)]
+                       (format fmt sk (render-trie branch))
+                       sk)))]
+    (re-group (if char-set (conj branches char-set) branches))))
 
 (defn pattern
   "Construct a regular expression from a collection of strings."

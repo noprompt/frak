@@ -58,4 +58,10 @@
   (let [pat1 (pattern ["foo" "foot"])
         pat2 (pattern ["foo" "" "foot"])]
     (is (= (str pat1)
-           (str pat2)))))
+           (str pat2))))
+
+  (is (= "ba[trz]"
+         (str (pattern ["bat" "bar" "baz"]))))
+
+  (is (= "b(?:i[pt]|at)"
+         (str (pattern ["bat" "bip" "bit"])))))
