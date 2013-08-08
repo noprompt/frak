@@ -33,7 +33,7 @@ characters which have "visited" the branch.
 
 During the rendering process frak will prefer branch characters that
 have "visited" the most. In the example above, you will notice the
-`ba(?:r|z)` branch takes precedence over `foo` even though `"foo"` was
+`ba[rz]` branch takes precedence over `foo` even though `"foo"` was
 the first to enter the trie. This is because the character `\b` has
 frequented the branch more than `\f` and `\q`. The example below
 illustrates this behavior on the second character of each input.
@@ -73,7 +73,7 @@ user> (def words
 #'user/words
 user> (def word-re (frak/pattern words))
 #'user/word-re
-user> (every? #(re-matches word-re %) words) 
+user> (every? #(re-matches word-re %) words)
 true
 ```
 
@@ -115,7 +115,7 @@ You can view the full expression
 
 ;;;; Benchmarks
 
-;; Naive pattern 
+;; Naive pattern
 
 (bench (doseq [w ws'] (re-matches n-pat w)))
 ;;             Execution time mean : 1.499489 sec
