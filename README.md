@@ -77,6 +77,9 @@ user> (every? #(re-matches word-re %) words)
 true
 ```
 
+The last two operations will take a moment since there are about
+235,886 words to consider.
+
 You can view the full expression
 [here](https://gist.github.com/noprompt/6106573/raw/fcb683834bb2e171618ca91bf0b234014b5b957d/word-re.clj)
 (it's approximately `1.5M`!).
