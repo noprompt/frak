@@ -87,8 +87,11 @@
 (defn pattern
   "Construct a regular expression from a collection of strings."
   ([strs]
-     (pattern strs false))
-  ([strs capture?]
+     (pattern strs {:capture? false, :exact? false}))
+  ([strs opts]
      {:pre [(every? string? strs)]}
-     (binding [*capture* capture?]
-       (-> strs build-trie render-trie str re-pattern))))
+     (let [pattern (binding [*capture* (:capture? opts)]
+                     (-> strs build-trie render-trie str))]
+       (re-pattern (if (:exact? opts)
+                     (str "^" pattern "$")
+                     pattern)))))
