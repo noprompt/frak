@@ -47,6 +47,6 @@
     (if (or (empty? args) (:help? opts))
       (help)
       (let [pat (str (frak/pattern words opts))]
-        (println (subs pat 1 (dec (count pat))))))))
+        (.log js/console (subs pat 1 (dec (count pat))))))))
 
 (set! *main-cli-fn* start)
