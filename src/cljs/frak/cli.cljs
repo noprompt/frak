@@ -37,7 +37,7 @@
   (.exit js/process code))
 
 (defn help []
-  (println summary)
+  (.error js/console summary)
   (exit 0))
 
 (defn start
