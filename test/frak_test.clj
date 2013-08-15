@@ -8,34 +8,34 @@
 (deftest trie-test  
   (is (= (-> (trie-put "a")
              (trie-put "b"))
-         ^{:terminals '(\b \a)
-           :visitors '(\b \a)}
          {\a nil
-          \b nil}))
+          \b nil
+          :terminals '(\b \a)
+          :visitors '(\b \a)}))
 
   (is (= (-> (trie-put "aaa")
              (trie-put "ab"))
-         ^{:visitors '(\a\a)}
          {\a
-          ^{:terminals '(\b)
-            :visitors '(\a \b)}
           {\a
-           ^{:terminals '(\a)
-             :visitors '(\a)}
-           {\a nil}
-           \b nil}}))
+           {\a nil
+            :terminals '(\a)
+            :visitors '(\a)}
+           \b nil
+           :terminals '(\b)
+           :visitors '(\b \a)}
+          :visitors '(\a \a)}))
 
   (is (= (-> (trie-put "ab")
              (trie-put "aaa"))
-         ^{:visitors '(\a\a)}
          {\a
-          ^{:terminals '(\b)
-            :visitors '(\a \b)}
           {\a
-           ^{:terminals '(\a)
-             :visitors '(\a)}
-           {\a nil}
-           \b nil}})))
+           {\a nil
+            :terminals '(\a)
+            :visitors '(\a)}
+           \b nil
+           :terminals '(\b)
+           :visitors '(\a \b)}
+          :visitors '(\a\a)})))
 
 (deftest pattern-test
   (let [strs1 ["foo" "bar" "baz"]
