@@ -46,8 +46,10 @@
 
 (def ^{:private true
        :doc "Characters to escape when rendering a regular expression."}
-  escape-char?
+  escape-chars
   #{\\ \^ \$ \* \+ \? \. \| \( \) \{ \} \[ \]})
+
+(def ^:private escape-char? escape-chars)
 
 (defn escape [c]
   (if (escape-char? c) (str "\\" c) (str c)))
