@@ -9,9 +9,6 @@
   [coll]
   (map-indexed (fn [i _] (take (inc i) coll)) coll))
 
-(defn- update-meta [obj ks f & args]
-  (apply vary-meta obj update-in ks f args))
-
 ;;;; Trie construction
 
 (defn- grow [trie [_ & cs :as chars] terminal?]
@@ -19,10 +16,10 @@
             (let [it (or inner-trie {})
                   lc (last chars)
                   it (if terminal?
-                       (update-meta it [:terminals] conj lc) 
+                       (update-in it [:terminals] conj lc) 
                        it)]
               (-> it
-                  (update-meta [:visitors] conj lc)
+                  (update-in [:visitors] conj lc)
                   (assoc lc (get-in trie chars)))))]
     (if (seq cs)
       (update-in trie (butlast chars) visit)
@@ -68,9 +65,10 @@
   (format "[%s]" (apply str chars)))
 
 (defn- render-trie [trie]
-  (let [{vs :visitors ts :terminals} (meta trie)
+  (let [{vs :visitors ts :terminals} trie
         terminal? (set ts)
         ks (->> (keys trie)
+                (filter char?)
                 (sort-by (frequencies vs))
                 reverse)
         nks (if-let [cs (seq (filter #(nil? (trie %)) ks))]
