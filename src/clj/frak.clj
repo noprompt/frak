@@ -31,13 +31,13 @@
 (defn- trie-put
   ([s] (trie-put {} s))
   ([trie s]
-     {:pre [(map? trie) (string? s)]}
-     (if-not (seq s)
-       trie
-       (loop [t trie, ps (prefixes s)]
-         (if-let [cs (and (next ps) (first ps))]
-           (recur (grow t cs false) (next ps))
-           (grow t (first ps) true))))))
+     (let [s (str s)]
+       (if-not (seq s)
+         trie
+         (loop [t trie, ps (prefixes s)]
+           (if-let [cs (and (next ps) (first ps))]
+             (recur (grow t cs false) (next ps))
+             (grow t (first ps) true)))))))
 
 (defn- build-trie [strs]
   (reduce trie-put {} strs))
@@ -91,7 +91,6 @@
   ([strs]
      (pattern strs {:capture? false, :exact? false}))
   ([strs opts]
-     {:pre [(every? string? strs)]}
      (let [pattern (binding [*capture* (:capture? opts)]
                      (-> strs build-trie render-trie str))]
        (re-pattern (if (:exact? opts)
