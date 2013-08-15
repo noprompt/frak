@@ -48,8 +48,8 @@
 
 (def ^:private escape-char? escape-chars)
 
-(defn escape [c]
-  (if (escape-char? c) (str "\\" c) (str c)))
+(defn- escape [c]
+  (str (when (escape-char? c) "\\") c))
 
 (def ^{:private true :dynamic true} *capture* false)
 
