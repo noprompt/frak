@@ -67,8 +67,8 @@
 (defn- render-trie [trie]
   (let [{vs :visitors ts :terminals} trie
         terminal? (set ts)
-        ks (->> (keys trie)
-                (filter char?)
+        ks (->> (dissoc trie :visitors :terminals)
+                (keys)
                 (sort-by (frequencies vs))
                 reverse)
         nks (if-let [cs (seq (filter #(nil? (trie %)) ks))]
