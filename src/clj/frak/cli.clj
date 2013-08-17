@@ -4,5 +4,5 @@
 (defn -main
   "Passes arguments to frak/pattern"
   [& args]
-  (println (frak/pattern args))
+  (println (str (frak/pattern args)))
   (System/exit 0))
