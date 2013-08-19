@@ -25,9 +25,9 @@
           <sourceDirectories>
             <sourceDirectory>src</sourceDirectory>
           </sourceDirectories>
-	  <testSourceDirectories>
+          <testSourceDirectories>
             <testSourceDirectory>test</testSourceDirectory>
-	  </testSourceDirectories>
+          </testSourceDirectories>
         </configuration>
       </plugin>
     </plugins>
