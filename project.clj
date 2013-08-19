@@ -25,4 +25,4 @@
                                    :pretty-print false
                                    :target :nodejs}}]}
   :main frak.cli
-  :repl-options {:init-ns user})
+  :repl-options {:init-ns frak})
