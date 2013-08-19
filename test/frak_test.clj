@@ -6,36 +6,30 @@
 (def build-trie #'frak/build-trie)
 
 (deftest trie-test  
-  (is (= (-> (trie-put "a")
-             (trie-put "b"))
-         {\a nil
-          \b nil
-          :terminals '(\b \a)
-          :visitors '(\b \a)}))
+  (is (= (build-trie ["a" "b"]) 
+         {:char nil
+          :terminal? false
+          :children #{{:char \a
+                       :terminal? true
+                       :children #{}}
+                      {:char \b
+                       :terminal? true
+                       :children #{}}}}))
 
-  (is (= (-> (trie-put "aaa")
-             (trie-put "ab"))
-         {\a
-          {\a
-           {\a nil
-            :terminals '(\a)
-            :visitors '(\a)}
-           \b nil
-           :terminals '(\b)
-           :visitors '(\b \a)}
-          :visitors '(\a \a)}))
-
-  (is (= (-> (trie-put "ab")
-             (trie-put "aaa"))
-         {\a
-          {\a
-           {\a nil
-            :terminals '(\a)
-            :visitors '(\a)}
-           \b nil
-           :terminals '(\b)
-           :visitors '(\a \b)}
-          :visitors '(\a\a)})))
+  (is (= (build-trie ["aaa" "ab"])
+         (build-trie ["ab" "aaa"])
+         {:char nil
+          :terminal? false
+          :children #{{:char \a
+                       :terminal? false
+                       :children #{{:char \a
+                                    :terminal? false
+                                    :children #{{:char \a
+                                                 :terminal? true
+                                                 :children #{}}}}
+                                   {:char \b
+                                    :terminal? true
+                                    :children #{}}}}}})))
 
 (deftest pattern-test
   (let [strs1 ["foo" "bar" "baz"]
@@ -55,13 +49,12 @@
                  (re-matches pat1 "ba")
                  (re-matches pat1 "fo")))))
 
-  (let [pat1 (pattern ["foo" "foot"])
-        pat2 (pattern ["foo" "" "foot"])]
-    (is (= (str pat1)
-           (str pat2))))
+  (is (= (string-pattern ["foo" "foot"] nil)
+         (string-pattern ["foo" "" "foot"] nil)))
 
-  (is (= "ba[trz]"
-         (str (pattern ["bat" "bar" "baz"]))))
+  (is (= (re-matches
+          #"ba\[[trz]{3}\]"
+          (string-pattern ["bat" "bar" "baz"] nil))))
 
   (is (= "b(?:i[pt]|at)"
-         (str (pattern ["bat" "bip" "bit"])))))
+         (string-pattern ["bat" "bip" "bit"] nil))))

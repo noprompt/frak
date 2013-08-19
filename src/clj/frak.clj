@@ -1,43 +1,51 @@
 (ns frak
   "Generate regular expressions from collections of strings."
-  (:require [clojure.string :as s]))
-
-;;;; Utilities
-
-(defn- prefixes
-  "Return a list of all prefixes for a given collection."
-  [coll]
-  (map-indexed (fn [i _] (take (inc i) coll)) coll))
+  (:require [clojure.string :as string]
+            [clojure.set :as set]))
 
 ;;;; Trie construction
 
-(defn- grow [trie [_ & cs :as chars] terminal?]
-  (letfn [(visit [inner-trie]
-            (let [it (or inner-trie {})
-                  lc (last chars)
-                  it (if terminal?
-                       (update-in it [:terminals] conj lc) 
-                       it)]
-              (-> it
-                  (update-in [:visitors] conj lc)
-                  (assoc lc (get-in trie chars)))))]
-    (if (seq cs)
-      (update-in trie (butlast chars) visit)
-      (visit trie))))
+(defn- trie-node
+  "Create a new trie node."
+  ([char]
+     (trie-node char false))
+  ([char terminal?]
+     {:char char, :terminal? terminal?, :children #{}}))
+
+(def ^{:private true
+       :doc "Root node for new tries."}
+  root-node (trie-node nil))
+
+(defn- find-by-char
+  "Return a character child of trie node if it exists."
+  [node char]
+  (-> (:children node)
+      (set/index [:char])
+      (get {:char char})
+      first))
 
 (defn- trie-put
-  ([s] (trie-put {} s))
-  ([trie s]
-     (let [s (str s)]
-       (if-not (seq s)
-         trie
-         (loop [t trie, ps (prefixes s)]
-           (if-let [cs (and (next ps) (first ps))]
-             (recur (grow t cs false) (next ps))
-             (grow t (first ps) true)))))))
+  "Add a sequence of characters to a trie."
+  [trie chars]
+  (if-not (seq chars)
+    trie
+    (let [[char & more] chars
+          terminal? (not more)]
+      (update-in
+       trie
+       [:children]
+       (fn [children]
+         (if-let [c (find-by-char trie char)]
+           (let [subtrie (trie-put c more)]
+             (-> (set/difference children #{c})
+                 (conj (update-in subtrie [:terminal?] #(or % terminal?)))))
+           (conj children
+                 (trie-put (trie-node char terminal?) more))))))))
 
-(defn- build-trie [strs]
-  (reduce trie-put {} strs))
+(defn- build-trie
+  "Construct a new character trie from a collection of strings."
+  [strs]
+  (reduce trie-put root-node strs))
 
 ;;;; Pattern rendering
 
@@ -46,51 +54,119 @@
   escape-chars
   #{\\ \^ \$ \* \+ \? \. \| \( \) \{ \} \[ \]})
 
-(def ^:private escape-char? escape-chars)
+(defn- escape
+  "Escape a character if it is an element of `escape-chars`."
+  [c]
+  (str (when (escape-chars c) "\\") c))
 
-(defn- escape [c]
-  (str (when (escape-char? c) "\\") c))
+(def ^{:private true
+       :dynamic true
+       :doc "When set to true regular expression groups will capture."}
+  *capture* false)
 
-(def ^{:private true :dynamic true} *capture* false)
+(defn- re-group-start
+  "Return the starting delimiter of a regular expression group."
+  [capture?]
+  (if capture? "(" "(?:"))
 
-(defn- re-group-fmt []
-  (str (if *capture* "(" "(?:") "%s)"))
+(defn- re-group-end
+  "Return the ending delimiter of a regular expression group."
+  [optional?]
+  (if optional? ")?" ")"))
 
-(defn- re-group [[s & more :as strs]]
-  (if (seq more)
-    (format (re-group-fmt) (s/join "|" strs))
-    s))
+(defn- re-group
+  "Convert a collection of strings into a regular expression group. When
+   `optional?` is truthy a the group will end with \")?\"."
+  ([strs]
+     (re-group strs false))
+  ([strs optional?]
+     (when (seq strs)
+       (str
+        (re-group-start *capture*)
+        (string/join "|" strs)
+        (re-group-end optional?)))))
 
-(defn- re-char-set [chars]
-  (format "[%s]" (apply str chars)))
+(defn- re-char-set
+  "Convert a collection of characters in to a regular expression
+   character set. When `optional?` is truthy a \"?\" is appended."
+  ([chars]
+     (re-char-set chars false))
+  ([chars optional?]
+     (when (seq chars)
+       (str 
+        (if (= 1 (count chars))
+          (first chars)
+          (format "[%s]" (apply str chars)))
+        (when optional? "?")))))
 
-(defn- render-trie [trie]
-  (let [{vs :visitors ts :terminals} trie
-        terminal? (set ts)
-        ks (->> (dissoc trie :visitors :terminals)
-                (keys)
-                (sort-by (frequencies vs))
-                reverse)
-        nks (if-let [cs (seq (filter #(nil? (trie %)) ks))]
-              (when (< 1 (count cs)) cs))
-        char-set (and (seq nks) (re-char-set nks))
-        branches (for [k (remove (set nks) ks)]
-                   (let [sk (escape k)
-                         fmt (if (terminal? k)
-                               (str "%s" (re-group-fmt) "?")
-                               "%s%s")]
-                     (if-let [branch (trie k)]
-                       (format fmt sk (render-trie branch))
-                       sk)))]
-    (re-group (if char-set (conj branches char-set) branches))))
+(defn- render-trie-strategy [node]
+  (let [{:keys [terminal? children]} node]
+    (if-not (seq children)
+      ::single-char
+      (if (= 1 (count children))
+        (if terminal?
+          ::single-child-terminal
+          ::single-child-non-terminal)))))
+
+(defmulti ^:private render-trie
+  "Recursively render a trie as a regular expression."
+  render-trie-strategy)
+
+(defmethod render-trie ::single-char
+  [{:keys [char]}]
+  (str char))
+
+(defmethod render-trie ::single-child-terminal
+  [{:keys [char children]}]
+  (let [child (first children)]
+    (str
+     char
+     (if (and (:terminal? child)
+              (not (seq (:children child))))
+       (render-trie
+        (update-in child [:char] #(str % "?")) )
+       (str (re-group-start *capture*)
+            (render-trie child)
+            (re-group-end true))))))
+
+(defmethod render-trie ::single-child-non-terminal
+  [{:keys [char children]}]
+  (let [child (first children)]
+    (str char (render-trie child))))
+
+(defmethod render-trie :default
+  [{:keys [char children terminal?]}]
+  (let [groups (-> (juxt :terminal? :children)
+                   (group-by children)
+                   (dissoc nil))
+        grouped 
+        (mapv
+         (fn [[_ v]]
+           (str (re-char-set (map :char v))
+                (-> (first v)
+                    (dissoc :char)
+                    (render-trie)
+                    ;; This is such an ugly hack.
+                    (string/replace #"\(\?:?(\[[^\]]+\])\)" "$1"))))
+         groups)]
+    (str char
+         (if (= (first grouped) (peek grouped))
+           (str (peek grouped) (when terminal? "?"))
+           (re-group grouped terminal?)))))
+
+(defn string-pattern
+  "Construct a regular expression as a string from a collection
+   of strings."
+  [strs opts]
+  (let [pattern (binding [*capture* (:capture? opts)]
+                  (-> strs build-trie render-trie))]
+    (if (:exact? opts)
+      (str "^" pattern "$")
+      pattern)))
 
 (defn pattern
   "Construct a regular expression from a collection of strings."
   ([strs]
      (pattern strs {:capture? false, :exact? false}))
   ([strs opts]
-     (let [pattern (binding [*capture* (:capture? opts)]
-                     (-> strs build-trie render-trie str))]
-       (re-pattern (if (:exact? opts)
-                     (str "^" pattern "$")
-                     pattern)))))
+     (re-pattern (string-pattern strs opts))))
