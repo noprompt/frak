@@ -92,7 +92,7 @@
   ([chars]
      (re-char-set chars false))
   ([chars optional?]
-     (when (seq chars)
+     (when-let [chars (and (seq chars) (map escape chars))]
        (str 
         (if (= 1 (count chars))
           (first chars)
@@ -114,13 +114,13 @@
 
 (defmethod render-trie ::single-char
   [{:keys [char]}]
-  (str char))
+  (escape char))
 
 (defmethod render-trie ::single-child-terminal
   [{:keys [char children]}]
   (let [child (first children)]
     (str
-     char
+     (escape char)
      (if (and (:terminal? child)
               (not (seq (:children child))))
        (render-trie
@@ -131,8 +131,7 @@
 
 (defmethod render-trie ::single-child-non-terminal
   [{:keys [char children]}]
-  (let [child (first children)]
-    (str char (render-trie child))))
+  (str (escape char) (render-trie (first children))))
 
 (defmethod render-trie :default
   [{:keys [char children terminal?]}]
@@ -146,10 +145,11 @@
                 (-> (first v)
                     (dissoc :char)
                     (render-trie)
+                    ;; Replace instances of "(?:[abc])" with "[abc]".
                     ;; This is such an ugly hack.
                     (string/replace #"\(\?:?(\[[^\]]+\])\)" "$1"))))
          groups)]
-    (str char
+    (str (escape char)
          (if (= (first grouped) (peek grouped))
            (str (peek grouped) (when terminal? "?"))
            (re-group grouped terminal?)))))
@@ -164,7 +164,7 @@
       (str "^" pattern "$")
       pattern)))
 
-(defn pattern
+(defn ^:export pattern
   "Construct a regular expression from a collection of strings."
   ([strs]
      (pattern strs {:capture? false, :exact? false}))

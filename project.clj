@@ -3,26 +3,31 @@
   :url "http://github.com/noprompt/frak"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :jar-exclusions [#"(?:\.(?:cljx|sw[onp])|cli\.cljs?)"]
   :dependencies [[org.clojure/clojure "1.5.1"]]
-  :plugins [[lein-cljsbuild "0.3.2"]]
-  :source-paths ["src/clj"]
-  :profiles {:dev {:dependencies [[criterium "0.4.1"]]}}
-  :cljsbuild {:crossovers [frak]
-              :crossover-path "crossovers"
-              :crossover-jar true
-              :builds [{:id "dev"
-                        :source-paths ["src/clj" "src/cljs"]
-                        :compiler {:output-to "bin/frak.dev.js"
-                                   :optimizations :simple
-                                   :pretty-print true
-                                   :target :nodejs}}
-                       
-                       {:id "prod"
-                        :source-paths ["src/clj" "src/cljs"]
-                        :compiler {:output-to "bin/frak.prod.js"
+  :plugins [[lein-cljsbuild "0.3.2"]
+            [com.keminglabs/cljx "0.3.0"]]
+  :source-paths ["src/cljx"]
+  :profiles {:dev {:dependencies [[criterium "0.4.1"]
+                                  [com.keminglabs/cljx "0.3.0"]]
+                   :repl-options {:nrepl-middleware [cljx.repl-middleware/wrap-cljx]}}}
+  :cljx {:builds [{:source-paths ["src/cljx"]
+                   :output-path "target/classes"
+                   :rules :clj}
+                  {:source-paths ["src/cljx"]
+                   :output-path "target/classes"
+                   :rules :cljs}]}
+  :cljsbuild {:builds [{:id "browser"
+                        :source-paths ["target/classes"]
+                        :compiler {:output-to "resources/frak.min.js"
+                                   :optimizations :advanced 
+                                   :pretty-print false}}
+                       {:id "node"
+                        :source-paths ["target/classes"]
+                        :compiler {:output-to "bin/frak"
                                    :externs ["resources/externs/process.js"]
                                    :optimizations :advanced
                                    :pretty-print false
-                                   :target :nodejs}}]}
+                                   :target :nodejs}}]} 
   :main frak.cli
   :repl-options {:init-ns frak})
