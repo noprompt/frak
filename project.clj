@@ -10,7 +10,8 @@
   :source-paths ["src/cljx"]
   :profiles {:dev {:dependencies [[criterium "0.4.1"]
                                   [com.keminglabs/cljx "0.3.0"]]
-                   :repl-options {:nrepl-middleware [cljx.repl-middleware/wrap-cljx]}}}
+                   :repl-options {:nrepl-middleware [cljx.repl-middleware/wrap-cljx]}
+                   :hooks [cljx.hooks]}}
   :cljx {:builds [{:source-paths ["src/cljx"]
                    :output-path "target/classes"
                    :rules :clj}
