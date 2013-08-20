@@ -34,20 +34,20 @@
 (deftest pattern-test
   (let [strs1 ["foo" "bar" "baz"]
         strs2 ["baz" "bar" "foo"]
-        pat1 (pattern strs1)
-        pat2 (pattern strs2)]
-    (is (every? #(re-matches pat1 %) strs1))
+        match1 (partial re-matches (pattern strs1))
+        match2 (partial re-matches (pattern strs2))]
+    (is (every? match1 strs1))
 
-    (is (every? #(re-matches pat2 %) strs1))
+    (is (every? match2 strs1))
 
-    (is (every? #(re-matches pat1 %) strs2))
+    (is (every? match1 strs2))
 
-    (is (every? #(re-matches pat2 %) strs2))
+    (is (every? match2 strs2))
 
-    (is (not (or (re-matches pat1 "f")
-                 (re-matches pat1 "b")
-                 (re-matches pat1 "ba")
-                 (re-matches pat1 "fo")))))
+    (is (not (or (match1 "f")
+                 (match1 "b")
+                 (match1 "ba")
+                 (match1 "fo")))))
 
   (is (= (string-pattern ["foo" "foot"] nil)
          (string-pattern ["foo" "" "foot"] nil)))
