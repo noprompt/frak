@@ -19,7 +19,7 @@
                    :rules :cljs}]}
   :cljsbuild {:builds [{:id "browser"
                         :source-paths ["target/classes"]
-                        :compiler {:output-to "resources/frak.min.js"
+                        :compiler {:output-to "target/js/frak.min.js"
                                    :optimizations :advanced 
                                    :pretty-print false}}
                        {:id "node"
