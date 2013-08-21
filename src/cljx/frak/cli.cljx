@@ -1,6 +1,7 @@
 (ns frak.cli
   "Command line interface."
   (:require [clojure.string :as string]
+            [guns.cli.optparse :as o]
             [frak]))
 
 ;;;; Utilities
@@ -32,45 +33,23 @@
 ;;;; Main 
 
 (def main-flags
-  [[["-e" "--exact"] "Generated pattern requires an exact match"]
-   [["-c" "--capture"] "Generated pattern captures"]
-   [["-h" "--help"] "Display this help message"]])
-
-(defn flag-val [s]
-  (condp re-seq s
-    #"-(?:e|-exact)" {:exact? true}
-    #"-(?:c|-capture)" {:capture? true}
-    #"-(?:h|-help)" {:help? true}
-    {}))
-
-(defn flags->opts [flags]
-  (reduce
-   (fn [m flag]
-     (merge m (flag-val flag)))
-   {}
-   flags))
-
-(def summary 
-  (reduce
-   (fn [message [flags info]]
-     (format "%s\t%s\t%s\n" message (string/join ", " flags) info))
-   "Usage: frak <flags*> <strings+>\n\n"
-   main-flags))
-
-(defn parse-args [args]
-  (let [flag? (->> (mapcat first main-flags)
-                   (frak/pattern)
-                   (partial re-matches))]
-    (split-with flag? args)))
+  [["-e" "--exact" "Generated pattern requires an exact match"
+    :key :exact?]
+   ["-c" "--capture" "Generated pattern captures"
+    :key :capture?]
+   ["-h" "--help" "Display this help message"]])
 
 (defn -main
   "Passes arguments to frak/pattern"
   [& args]
-  (let [[flags words] (parse-args args)
-        opts (flags->opts flags)]
-    (if (or (empty? args) (:help? opts))
-      (log summary)
-      (log (frak/string-pattern words opts)))
-    (exit 0)))
+  (try
+    (let [[opts words summary] (o/parse args main-flags)]
+      (if (or (empty? words) (:help opts))
+        (log (str "Usage: frak <flags*> <strings+>\n\nFlags:\n" summary))
+        (log (frak/string-pattern words (select-keys opts [:exact? :capture?]))))
+      (exit 0))
+    (catch #+clj AssertionError #+cljs js/Error e
+      (log (#+clj .getMessage #+cljs .-message e))
+      (exit 1))))
 
 #+cljs (set! *main-cli-fn* -main)

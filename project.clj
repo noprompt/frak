@@ -4,7 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :jar-exclusions [#"(?:\.(?:cljx|sw[onp])|cli\.cljs?)"]
-  :dependencies [[org.clojure/clojure "1.5.1"]]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [guns.cli/optparse "1.1.1"]]
   :plugins [[lein-cljsbuild "0.3.2"]
             [com.keminglabs/cljx "0.3.0"]]
   :source-paths ["src/cljx"]
