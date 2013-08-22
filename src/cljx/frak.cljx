@@ -83,8 +83,23 @@
      (when (seq strs)
        (str
         (re-group-start *capture*)
-        (string/join "|" strs)
+        (string/join strs)
         (re-group-end optional?)))))
+
+(defn- re-or
+  "Return a collection of strings joined with a regular expression or
+   (`|`) character. Intended to be used with `re-or-group`."
+  [strs]
+  (string/join "|" strs))
+
+(defn- re-or-group
+  "Convert a collection of strings into a regular expression group. When
+   `optional?` is truthy a the group will end with \")?\"."
+  ([strs]
+     (re-group strs false))
+  ([strs optional?]
+     (when (seq strs)
+       (re-group (re-or strs) optional?))))
 
 (defn- re-char-set
   "Convert a collection of characters in to a regular expression
@@ -117,7 +132,7 @@
   (escape char))
 
 (defmethod render-trie ::single-child-terminal
-  [{:keys [char children]}]
+  [{:keys [char children terminal?]}]
   (let [child (first children)]
     (str
      (escape char)
@@ -125,41 +140,60 @@
               (not (seq (:children child))))
        (render-trie
         (update-in child [:char] #(str % "?")) )
-       (str (re-group-start *capture*)
-            (render-trie child)
-            (re-group-end true))))))
+       (re-group (render-trie child) terminal?)))))
 
 (defmethod render-trie ::single-child-non-terminal
   [{:keys [char children]}]
-  (str (escape char) (render-trie (first children))))
+  (->> (first children)
+       (render-trie)
+       (str (escape char))))
 
 (defmethod render-trie :default
   [{:keys [char children terminal?]}]
   (let [groups (-> (juxt :terminal? :children)
                    (group-by children)
                    (dissoc nil))
-        grouped 
+        subpatterns 
         (mapv
          (fn [[_ v]]
-           (str (re-char-set (map :char v))
-                (-> (first v)
-                    (dissoc :char)
-                    (render-trie)
-                    ;; Replace instances of "(?:[abc])" with "[abc]".
-                    ;; This is such an ugly hack.
-                    (string/replace #"\(\?:?(\[[^\]]+\])\)" "$1"))))
+           (let [chars (map :char v)
+                 char-set (re-char-set chars)
+                 subpattern (-> (first v)
+                                (dissoc :char)
+                                (render-trie))]
+             (if (< 1 (count chars))
+               (re-group [char-set subpattern])
+               (str char-set subpattern))))
          groups)]
     (str (escape char)
-         (if (= (first grouped) (peek grouped))
-           (str (peek grouped) (when terminal? "?"))
-           (re-group grouped terminal?)))))
+         (if (= (first subpatterns) (peek subpatterns))
+           (str (peek subpatterns) (when terminal? "?"))
+           (re-or-group subpatterns terminal?)))))
 
+;; This is, admittedly, a dirty hack and bat shit crazy but, for now,
+;; it gets the job done. Until a more sophisticated data structure or
+;; rendering process built this will do for now.
+(defn- remove-unecessary-grouping
+  [pattern]
+  (-> pattern
+      ;; Replaces "(?:[xy]z)" and "(?:[xy]z)?" with "[xy]z" and
+      ;; "[xy]z?" respectively.
+      (string/replace #"\(\?:?(\[[^\]]+\])\)(\?)?"
+                      "$1$2")
+      ;; Replaces "(?:[ab]cd)" with "[ab]cd".
+      (string/replace #"\(\?:?(\[[^\]]+\])([^\|\)]+[^\?]?)\)([^\?])"
+                      "$1$2$3")))
+
+;; TODO: This needs to be `:export`ed and work with regular
+;; JavaScript.
 (defn string-pattern
   "Construct a regular expression as a string from a collection
    of strings."
   [strs opts]
   (let [pattern (binding [*capture* (:capture? opts)]
-                  (-> strs build-trie render-trie))]
+                  (-> (build-trie strs)
+                      render-trie
+                      remove-unecessary-grouping))]
     (if (:exact? opts)
       (str "^" pattern "$")
       pattern)))
