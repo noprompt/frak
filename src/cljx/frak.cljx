@@ -184,19 +184,24 @@
       (string/replace #"\(\?:?(\[[^\]]+\])([^\|\)]+[^\?]?)\)([^\?])"
                       "$1$2$3")))
 
-;; TODO: This needs to be `:export`ed and work with regular
-;; JavaScript.
 (defn string-pattern
   "Construct a regular expression as a string from a collection
    of strings."
-  [strs opts]
-  (let [pattern (binding [*capture* (:capture? opts)]
-                  (-> (build-trie strs)
-                      render-trie
-                      remove-unecessary-grouping))]
-    (if (:exact? opts)
-      (str "^" pattern "$")
-      pattern)))
+  ([strs]
+     (string-pattern strs {:capture? false, :exact? false}))
+  ([strs opts]
+     (let [#+cljs opts #+cljs (js->clj opts)
+           pattern (binding [*capture* (or (:capture? opts)
+                                           (opts "capture?"))]
+                     (-> (build-trie strs)
+                         render-trie
+                         remove-unecessary-grouping))]
+       (if (or (:exact? opts) (opts "exact?"))
+         (str "^" pattern "$")
+         pattern))))
+
+#+cljs
+(def ^:export stringPattern string-pattern)
 
 (defn ^:export pattern
   "Construct a regular expression from a collection of strings."
