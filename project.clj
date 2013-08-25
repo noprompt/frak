@@ -1,4 +1,4 @@
-(defproject frak "0.1.2"
+(defproject frak "0.1.3"
   :description "Transform collections of strings into regular expressions."
   :url "http://github.com/noprompt/frak"
   :license {:name "Eclipse Public License"

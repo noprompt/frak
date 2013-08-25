@@ -3,17 +3,19 @@
 frak transforms collections of strings into regular expressions for
 matching those strings. The primary goal of this library is to
 generate regular expressions from a known set of inputs which avoid
-backtracking as much as possible.
+backtracking as much as possible. It is available as a [command line
+utility](#command-line-usage) and for the [browser](#browser-usage)
+as a JavaScript library.
 
 ## "Installation"
 
 Add frak as a dependency to your `project.clj` file.
 
 ```clojure
-[frak "0.1.2"]
+[frak "0.1.3"]
 ```
 
-## Usage
+## Clojure(Script) usage
 
 ```clojure
 user> (require 'frak)
@@ -22,26 +24,80 @@ user> (frak/pattern ["foo" "bar" "baz" "quux"])
 #"(?:ba[rz]|foo|quux)"
 user> (frak/pattern ["Clojure" "Clojars" "ClojureScript"])
 #"Cloj(?:ure(?:Script)?|ars)"
+user> (frak/pattern ["skill" "skills" "skull" "skulls"])
+#"sk(?:[ui]lls?)"
 ```
+
+## Command line usage
+
+frak can be used from the command line with either Leiningen or NodeJS.
+
+### With Leiningen
+
+Use the `lein run` command:
+
+```shell
+$ lein run -e foo bar baz quux
+^(?:ba[rz]|foo|quux)$
+```
+
+### With NodeJS
+
+Compile the NodeJS version
+
+```shell
+$ lein do cljx once, cljsbuild once node
+$ chmod +x bin/frak
+$ bin/frak -e foo bar baz quux
+^(?:ba[rz]|foo|quux)$
+```
+
+## Browser usage
+
+To use frak as a standalone library in the browser with JavaScript
+compile the browser version:
+
+```shell
+$ lein do cljx once, cljsbuild once browser
+$ mv ./target/js/frak.min.js <destination>
+```
+
+Try it using this HTML:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <pre>Input: <span id="input"></span></pre>
+  <pre>Output: <span id="output"></span></pre>
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script src="frak.min.js"></script>
+  <script>
+    var strings = ["foo", "bar", "baz", "quux"];
+    // It's a good idea to use the `"exact?"` option.
+    var pattern = frak.pattern(strings, {"exact?": true})
+    jQuery("#input").text(strings.join(" "));
+    jQuery("#output").text(pattern);
+  </script>
+</body>
+</html>
+```
+
+For even more fun try it with [AngularJS](http://angularjs.org/)!
 
 ## How?
 
-A frak pattern is constructed from a trie of characters. As characters
-are added to it, meta data is stored in it's branches containing
-information such as which branches are terminal and a record of
-characters which have "visited" the branch.
+A frak pattern is constructed from a trie of characters and a
+renderer which processes it. As characters are added to the trie, data
+information about as which branches are terminal are stored in it's
+branches.
 
-During the rendering process frak will prefer branch characters that
-have "visited" the most. In the example above, you will notice the
-`ba[rz]` branch takes precedence over `foo` even though `"foo"` was
-the first to enter the trie. This is because the character `\b` has
-frequented the branch more than `\f` and `\q`. The example below
-illustrates this behavior on the second character of each input.
-
-```clojure
-user> (frak/pattern ["bit" "bat" "ban" "bot" "bar" "box"])
-#"b(?:a[tnr]|o[tx]|it)"
-```
+During the rendering process frak analyzes each branch and attempts to
+emit the most concise regular expression possible. Additional post
+operations are applied after the rendering to improve the expression
+where possible.
 
 ## Why?
 
