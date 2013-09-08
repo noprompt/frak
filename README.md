@@ -91,13 +91,13 @@ For even more fun try it with [AngularJS](http://angularjs.org/)!
 
 A frak pattern is constructed from a trie of characters and a
 renderer which processes it. As characters are added to the trie, data
-information about as which branches are terminal are stored in it's
+such as such as which characters are terminal are stored in it's
 branches.
 
 During the rendering process frak analyzes each branch and attempts to
 emit the most concise regular expression possible. Additional post
-operations are applied after the rendering to improve the expression
-where possible.
+operations are applied after rendering to improve the expression where
+possible.
 
 ## Why?
 
@@ -123,8 +123,8 @@ user> (every? #(re-matches word-re %) words)
 true
 ```
 
-The last two operations will take a moment since there are about
-235,886 words to consider.
+The last two operations will take a moment since there are over
+235,000 words to consider.
 
 You can view the full expression
 [here](https://gist.github.com/noprompt/6106573/raw/fcb683834bb2e171618ca91bf0b234014b5b957d/word-re.clj)
@@ -151,6 +151,7 @@ You can view the full expression
 
 ;; Shuffle 10000 words and build a naive and frak pattern from them.
 (def ws (shuffle (take 10000 words)))
+
 (def n-pat (naive-pattern ws))
 (def f-pat (frak/pattern ws))
 
