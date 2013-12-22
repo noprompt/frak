@@ -1,0 +1,25 @@
+Name:                frak
+Version:             0.1
+Synopsis:            Transform collections of strings into regular expressions.
+Author:              Joel Holdbrooks
+Stability:           Experimental
+Category:            Text
+Build-type:          Simple
+Cabal-version:       >=1.2
+
+Flag development
+  Description: Whether to build the server in development (interpreted) mode
+  Default: False
+
+Flag old-base
+  default: False
+  manual: False
+
+Executable frak
+  hs-source-dirs: src
+  main-is: Main.hs
+
+  Build-depends:
+    base             >= 4.4      && < 5,
+    bytestring       ,
+    bytestring-trie

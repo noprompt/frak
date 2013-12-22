@@ -10,3 +10,5 @@ pom.xml.asc
 .lein-failures
 .lein-plugins
 .lein-repl-history
+.cabal-*
+cabal.sandbox.config
