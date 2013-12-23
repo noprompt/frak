@@ -9,7 +9,6 @@ data Trie = Trie { char :: Maybe Char
 
 empty = Trie Nothing False M.empty
 
-fromList = undefined
 -- Trie (Just 'b') False $ M.fromList [('a', Trie (Just 'a') False $ M.fromList [('t', Trie (Just 't') True M.empty)])]
 -- adding b to bat changes b False a False t True
 -- to b True a False t True
@@ -25,3 +24,5 @@ insert (c:cs) (Trie char terminal children) =
         M.insert c (insert cs $ Trie (Just c) term M.empty) children
       Just (Trie _ terminal innerChildren) ->
         M.insert c (insert cs $ Trie (Just c) (terminal || term) innerChildren) children
+
+fromList = foldr insert empty
