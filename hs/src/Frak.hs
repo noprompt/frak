@@ -2,7 +2,7 @@ module Frak where
 
 import qualified Data.Map as M
 
-data Trie = Trie { char :: Maybe Char
+data Trie = Trie { char     :: Maybe Char
                  , terminal :: Bool
                  , children :: (M.Map Char Trie)
                  } deriving (Show)
