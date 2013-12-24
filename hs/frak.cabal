@@ -21,5 +21,18 @@ Executable frak
 
   Build-depends:
     base             >= 4.4      && < 5,
-    containers       >= 0.5.0.0  && < 0.6.0.0,
-    text             >= 0.11     && < 0.12
+    containers,
+    text
+
+Test-Suite test-frak
+  type:       exitcode-stdio-1.0
+  hs-source-dirs: src
+  main-is:    test.hs
+  GHC-Options: -threaded
+  Default-language:    Haskell2010
+  Build-depends:       base < 5,
+                       containers,
+                       text,
+                       HUnit,
+                       tasty,
+                       tasty-hunit

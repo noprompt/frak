@@ -5,7 +5,7 @@ import qualified Data.Map as M
 data Trie = Trie { char     :: Maybe Char
                  , terminal :: Bool
                  , children :: (M.Map Char Trie)
-                 } deriving (Show)
+                 } deriving (Eq, Show)
 
 empty = Trie Nothing False M.empty
 
