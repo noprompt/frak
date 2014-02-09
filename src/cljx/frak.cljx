@@ -192,11 +192,11 @@
   ([strs opts]
      (let [#+cljs opts #+cljs (js->clj opts)
            pattern (binding [*capture* (or (:capture? opts)
-                                           (opts "capture?"))]
+                                           (get opts "capture?"))]
                      (-> (build-trie strs)
                          render-trie
                          remove-unecessary-grouping))]
-       (if (or (:exact? opts) (opts "exact?"))
+       (if (or (:exact? opts) (get opts "exact?"))
          (str "^" pattern "$")
          pattern))))
 
