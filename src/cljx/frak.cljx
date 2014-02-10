@@ -139,7 +139,7 @@
      (if (and (:terminal? child)
               (not (seq (:children child))))
        (render-trie
-        (update-in child [:char] #(str % "?")) )
+        (update-in child [:char] #(str (escape %) "?")))
        (re-group (render-trie child) terminal?)))))
 
 (defmethod render-trie ::single-child-non-terminal
@@ -192,11 +192,11 @@
   ([strs opts]
      (let [#+cljs opts #+cljs (js->clj opts)
            pattern (binding [*capture* (or (:capture? opts)
-                                           (opts "capture?"))]
+                                           (get opts "capture?"))]
                      (-> (build-trie strs)
                          render-trie
                          remove-unecessary-grouping))]
-       (if (or (:exact? opts) (opts "exact?"))
+       (if (or (:exact? opts) (get opts "exact?"))
          (str "^" pattern "$")
          pattern))))
 
