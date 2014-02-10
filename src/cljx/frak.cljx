@@ -139,7 +139,7 @@
      (if (and (:terminal? child)
               (not (seq (:children child))))
        (render-trie
-        (update-in child [:char] #(str % "?")) )
+        (update-in child [:char] #(str (escape %) "?")))
        (re-group (render-trie child) terminal?)))))
 
 (defmethod render-trie ::single-child-non-terminal
