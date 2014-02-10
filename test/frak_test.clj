@@ -59,6 +59,9 @@
   (is (= "b(?:i[pt]|at)"
          (string-pattern ["bat" "bip" "bit"] nil)))
 
+  (is (= "foo\\??"
+         (string-pattern ["foo" "foo?"])))
+
   (are [words] (every? #(re-matches (pattern words) %) words)
     ["achy" "achylia" "achylous" "achymia" "achymous"]
     ["aching" "achingly"]))
