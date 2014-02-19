@@ -62,6 +62,12 @@
   (is (= "foo\\??"
          (string-pattern ["foo" "foo?"])))
 
+  (is (= "\\!\\\"\\#\\%\\&\\'\\,\\-\\/\\:\\;\\<\\=\\>\\@\\`\\~"
+         (string-pattern ["!\"#%&',-/:;<=>@`~"] {:escape-chars :vim})))
+
+  (is (= "foo\\★?"
+         (string-pattern ["foo" "foo★"] {:escape-chars #{\★}})))
+
   (are [words] (every? #(re-matches (pattern words) %) words)
     ["achy" "achylia" "achylous" "achymia" "achymous"]
     ["aching" "achingly"]))

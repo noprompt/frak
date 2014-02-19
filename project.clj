@@ -5,8 +5,9 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :jar-exclusions [#"(?:\.(?:cljx|sw[onp])|cli\.cljs?)"]
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [guns.cli/optparse "1.1.1"]]
-  :plugins [[lein-cljsbuild "0.3.2"]
+                 [org.clojure/clojurescript "0.0-2156"]
+                 [org.clojure/tools.cli "0.3.1"]]
+  :plugins [[lein-cljsbuild "1.0.2"]
             [com.keminglabs/cljx "0.3.0"]]
   :source-paths ["src/cljx"]
   :profiles {:dev {:dependencies [[criterium "0.4.1"]

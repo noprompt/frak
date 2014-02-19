@@ -49,15 +49,22 @@
 
 ;;;; Pattern rendering
 
+(def ^{:doc "Special characters in various regular expression implementations."}
+  metacharacters
+  {:default #{\\ \^ \$ \* \+ \? \. \| \( \) \{ \} \[ \]}
+   ;; Vimscript "very-magic" mode
+   :vim (set (remove #(re-find #"\w" (str %)) (map char (range 0x21 0x7f))))})
+
 (def ^{:private true
+       :dynamic true
        :doc "Characters to escape when rendering a regular expression."}
-  escape-chars
-  #{\\ \^ \$ \* \+ \? \. \| \( \) \{ \} \[ \]})
+  *escape-chars*
+  (:default metacharacters))
 
 (defn- escape
-  "Escape a character if it is an element of `escape-chars`."
+  "Escape a character if it is an element of `*escape-chars*`."
   [c]
-  (str (when (escape-chars c) "\\") c))
+  (str (when (contains? *escape-chars* c) "\\") c))
 
 (def ^{:private true
        :dynamic true
@@ -111,7 +118,7 @@
        (str 
         (if (= 1 (count chars))
           (first chars)
-          (format "[%s]" (apply str chars)))
+          (str \[ (apply str chars) \]))
         (when optional? "?")))))
 
 (defn- render-trie-strategy [node]
@@ -184,19 +191,32 @@
       (string/replace #"\(\?:?(\[[^\]]+\])([^\|\)]+[^\?]?)\)([^\?])"
                       "$1$2$3")))
 
+(defn- get*
+  "Map lookup. In CLJS, also does lookup by string representation of kw."
+  [map kw]
+  (or (get map kw)
+      #+cljs (get map (name kw))))
+
+(def ^:private default-options
+  {:capture? false
+   :exact? false
+   :escape-chars (:default metacharacters)})
+
 (defn string-pattern
   "Construct a regular expression as a string from a collection
    of strings."
   ([strs]
-     (string-pattern strs {:capture? false, :exact? false}))
+     (string-pattern strs default-options))
   ([strs opts]
      (let [#+cljs opts #+cljs (js->clj opts)
-           pattern (binding [*capture* (or (:capture? opts)
-                                           (get opts "capture?"))]
+           cs (or (get* opts :escape-chars) *escape-chars*)
+           cs (if (coll? cs) cs (get* metacharacters cs))
+           pattern (binding [*capture* (get* opts :capture?)
+                             *escape-chars* cs]
                      (-> (build-trie strs)
                          render-trie
                          remove-unecessary-grouping))]
-       (if (or (:exact? opts) (get opts "exact?"))
+       (if (get* opts :exact?)
          (str "^" pattern "$")
          pattern))))
 
@@ -206,6 +226,6 @@
 (defn ^:export pattern
   "Construct a regular expression from a collection of strings."
   ([strs]
-     (pattern strs {:capture? false, :exact? false}))
+     (pattern strs default-options))
   ([strs opts]
      (re-pattern (string-pattern strs opts))))
