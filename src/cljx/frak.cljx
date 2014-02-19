@@ -118,7 +118,7 @@
        (str 
         (if (= 1 (count chars))
           (first chars)
-          (format "[%s]" (apply str chars)))
+          (str \[ (apply str chars) \]))
         (when optional? "?")))))
 
 (defn- render-trie-strategy [node]
