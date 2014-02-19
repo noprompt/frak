@@ -38,6 +38,11 @@
     :id :exact?]
    ["-c" "--capture" "Generated pattern captures"
     :id :capture?]
+   ["-E" "--escape-chars :KEY|'CHARS'"
+    "Set of characters to escape in generated pattern"
+    :parse-fn #(if (= (first %) \:)
+                 (keyword (subs % 1))
+                 (set (map first (re-seq #"." %))))]
    ["-h" "--help" "Display this help message"]])
 
 (defn -main
@@ -50,7 +55,9 @@
       (exit 1))
     (if (or (empty? words) (:help options))
       (log (str "Usage: frak <flags*> <strings+>\n\nFlags:\n" summary))
-      (log (frak/string-pattern words (select-keys options [:exact? :capture?]))))
+      (log (frak/string-pattern
+             words
+             (select-keys options [:exact? :capture? :escape-chars]))))
     (exit 0)))
 
 #+cljs (set! *main-cli-fn* -main)
