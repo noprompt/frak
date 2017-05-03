@@ -61,6 +61,11 @@
   *escape-chars*
   (:default metacharacters))
 
+(def ^{:private true
+       :dynamic true
+       :doc "Whether the rendered regex should match only whole words"}
+  *whole-words* false)
+
 (defn- escape
   "Escape a character if it is an element of `*escape-chars*`."
   [c]
@@ -91,7 +96,9 @@
        (str
         (re-group-start *capture*)
         (string/join strs)
-        (re-group-end optional?)))))
+        (re-group-end optional?)
+        (when *whole-words*
+          "\\b")))))
 
 (defn- re-or
   "Return a collection of strings joined with a regular expression or
@@ -200,7 +207,8 @@
 (def ^:private default-options
   {:capture? false
    :exact? false
-   :escape-chars (:default metacharacters)})
+   :escape-chars (:default metacharacters)
+   :whole-words? false})
 
 (defn string-pattern
   "Construct a regular expression as a string from a collection
@@ -212,13 +220,16 @@
            cs (or (get* opts :escape-chars) *escape-chars*)
            cs (if (coll? cs) cs (get* metacharacters cs))
            pattern (binding [*capture* (get* opts :capture?)
-                             *escape-chars* cs]
+                             *escape-chars* cs
+                             *whole-words* (get* opts :whole-words?)]
                      (-> (build-trie strs)
                          render-trie
                          remove-unecessary-grouping))]
        (if (get* opts :exact?)
          (str "^" pattern "$")
-         pattern))))
+         (if (get* opts :whole-words?)
+           (str "\\b" pattern)
+           pattern)))))
 
 #+cljs
 (def ^:export stringPattern string-pattern)

@@ -5,8 +5,8 @@
 (def trie-put #'frak/trie-put)
 (def build-trie #'frak/build-trie)
 
-(deftest trie-test  
-  (is (= (build-trie ["a" "b"]) 
+(deftest trie-test
+  (is (= (build-trie ["a" "b"])
          {:char nil
           :terminal? false
           :children #{{:char \a
@@ -71,3 +71,15 @@
   (are [words] (every? #(re-matches (pattern words) %) words)
     ["achy" "achylia" "achylous" "achymia" "achymous"]
     ["aching" "achingly"]))
+
+(deftest pattern-whole-words
+  (is (= ["k pop"]
+         (re-seq (pattern ["pop" "k pop"]) "uk pop")))
+
+  (is (= ["k pop"]
+         (re-seq (pattern ["pop" "k pop"] {:whole-words? false}) "uk pop")))
+
+  (is (= ["uk" "pop" "rock"]
+         (re-seq (pattern ["pop" "k pop" "rock" "uk"] {:whole-words? true}) "uk pop and rock")))
+
+  (is (empty? (re-seq (pattern ["pop" "k pop"] {:whole-words? true}) "uk pops"))))
