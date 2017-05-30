@@ -12,7 +12,7 @@ as a JavaScript library.
 Add frak as a dependency to your `project.clj` file.
 
 ```clojure
-[frak "0.1.6"]
+[frak "0.1.7"]
 ```
 
 ## Clojure(Script) usage
