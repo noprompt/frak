@@ -28,6 +28,14 @@ user> (frak/pattern ["skill" "skills" "skull" "skulls"])
 #"sk(?:[ui]lls?)"
 ```
 
+## Options
+Frak's `pattern` function can accept an options map as its second argument, the available options are:
+
+* `:capture?` - boolean (default false), whether rendered regex should create capture groups for each match
+* `:escape-chars` - vector (default see [`frak/metacharacters`](https://github.com/noprompt/frak/blob/3c22d9b33646ca4bc681a5746ac0d11fd06e579b/src/cljx/frak.cljx#L54)), characters to escape when rendering a regular expression.
+* `:exact?` - boolean (default false), whether the rendered regex should only produces matches when the entire input string matches.
+* `:whole-words?` - boolean (default false), whether the rendered regex should match only whole words (word boundary at both ends of the match) in the input string.
+
 ## Command line usage
 
 frak can be used from the command line with either Leiningen or NodeJS.
