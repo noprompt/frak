@@ -4,7 +4,7 @@
             #?(:clj  [clojure.tools.cli :refer [parse-opts]]
                :cljs [cljs.tools.cli :refer [parse-opts]])
             [frak]
-            [frak.plaform :refer [exit printerr log]]))
+            [frak.platform :refer [exit printerr log]]))
 
 ;;;; Main 
 
