@@ -202,7 +202,7 @@
   "Map lookup. In CLJS, also does lookup by string representation of kw."
   [map kw]
   (or (get map kw)
-      #+cljs (get map (name kw))))
+      #?(:cljs (get map (name kw)))))
 
 (def ^:private default-options
   {:capture? false
@@ -214,25 +214,24 @@
   "Construct a regular expression as a string from a collection
    of strings."
   ([strs]
-     (string-pattern strs default-options))
+   (string-pattern strs default-options))
   ([strs opts]
-     (let [#+cljs opts #+cljs (js->clj opts)
-           cs (or (get* opts :escape-chars) *escape-chars*)
-           cs (if (coll? cs) cs (get* metacharacters cs))
-           pattern (binding [*capture* (get* opts :capture?)
-                             *escape-chars* cs
-                             *whole-words* (get* opts :whole-words?)]
-                     (-> (build-trie strs)
-                         render-trie
-                         remove-unecessary-grouping))]
-       (if (get* opts :exact?)
-         (str "^" pattern "$")
-         (if (get* opts :whole-words?)
-           (str "\\b" pattern)
-           pattern)))))
+   (let [#?@(:cljs [opts (js->clj opts)])
+         cs      (or (get* opts :escape-chars) *escape-chars*)
+         cs      (if (coll? cs) cs (get* metacharacters cs))
+         pattern (binding [*capture*      (get* opts :capture?)
+                           *escape-chars* cs
+                           *whole-words*  (get* opts :whole-words?)]
+                   (-> (build-trie strs)
+                       render-trie
+                       remove-unecessary-grouping))]
+     (if (get* opts :exact?)
+       (str "^" pattern "$")
+       (if (get* opts :whole-words?)
+         (str "\\b" pattern)
+         pattern)))))
 
-#+cljs
-(def ^:export stringPattern string-pattern)
+#?(:cljs (def ^:export stringPattern string-pattern))
 
 (defn ^:export pattern
   "Construct a regular expression from a collection of strings."

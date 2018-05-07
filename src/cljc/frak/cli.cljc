@@ -1,35 +1,10 @@
 (ns frak.cli
   "Command line interface."
   (:require [clojure.string :as string]
-            #+clj [clojure.tools.cli :refer [parse-opts]]
-            #+cljs [cljs.tools.cli :refer [parse-opts]]
-            [frak]))
-
-;;;; Utilities
-
-#+clj
-(defn exit [code]
-  (System/exit code))
-
-#+cljs 
-(defn exit [code]
-  (.exit js/process code))
-
-#+clj
-(defn printerr [message]
-  (.println *err* message))
-
-#+cljs
-(defn printerr [message]
-  (.error js/console message))
-
-#+clj
-(defn log [message]
-  (println message))
-
-#+cljs
-(defn log [message]
-  (.log js/console message))
+            #?(:clj  [clojure.tools.cli :refer [parse-opts]]
+               :cljs [cljs.tools.cli :refer [parse-opts]])
+            [frak]
+            [frak.plaform :refer [exit printerr log]]))
 
 ;;;; Main 
 
@@ -56,8 +31,8 @@
     (if (or (empty? words) (:help options))
       (log (str "Usage: frak <flags*> <strings+>\n\nFlags:\n" summary))
       (log (frak/string-pattern
-             words
-             (select-keys options [:exact? :capture? :escape-chars]))))
+            words
+            (select-keys options [:exact? :capture? :escape-chars]))))
     (exit 0)))
 
-#+cljs (set! *main-cli-fn* -main)
+#?(:cljs (set! *main-cli-fn* -main))
