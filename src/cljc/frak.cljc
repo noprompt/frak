@@ -122,7 +122,7 @@
      (re-char-set chars false))
   ([chars optional?]
      (when-let [chars (and (seq chars) (map escape chars))]
-       (str 
+       (str
         (if (= 1 (count chars))
           (first chars)
           (str \[ (apply str chars) \]))
@@ -167,7 +167,7 @@
   (let [groups (-> (juxt :terminal? :children)
                    (group-by children)
                    (dissoc nil))
-        subpatterns 
+        subpatterns
         (mapv
          (fn [[_ v]]
            (let [chars (map :char v)
@@ -227,7 +227,7 @@
                        remove-unecessary-grouping))]
      (if (get* opts :exact?)
        (str "^" pattern "$")
-       (if (get* opts :whole-words?)
+       (if (and (get* opts :whole-words?) (seq strs))
          (str "\\b" pattern)
          pattern)))))
 
