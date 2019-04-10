@@ -56,8 +56,8 @@
           #"ba\[[trz]{3}\]"
           (string-pattern ["bat" "bar" "baz"] nil))))
 
-  (is (= "b(?:i[pt]|at)"
-         (string-pattern ["bat" "bip" "bit"] nil)))
+  (let [p (string-pattern ["bat" "bip" "bit"] nil)]
+    (is (or (= "b(?:at|i[tp])" p) (= "b(?:i[pt]|at)" p)) p))
 
   (is (= "foo\\??"
          (string-pattern ["foo" "foo?"])))
@@ -73,6 +73,10 @@
     ["aching" "achingly"]))
 
 (deftest pattern-whole-words
+  (is (= ""
+         (string-pattern [] {:whole-words? false})
+         (string-pattern [] {:whole-words? true})))
+
   (is (= ["k pop"]
          (re-seq (pattern ["pop" "k pop"]) "uk pop")))
 
