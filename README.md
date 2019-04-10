@@ -11,9 +11,8 @@ as a JavaScript library.
 
 Add frak as a dependency to your `project.clj` file.
 
-```clojure
-[frak "0.1.8"]
-```
+[![Clojars Project](https://img.shields.io/clojars/v/frak.svg)](https://clojars.org/frak)
+
 
 ## Clojure(Script) usage
 
